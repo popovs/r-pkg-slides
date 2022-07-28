@@ -12,21 +12,20 @@ output:
 ---
 class: title-slide, bottom
 
-.bold[Matt Dray]
+.bold[Build your first R package]
+
+Sarah Popov | August 2022
 
 <p style="font-size:30px;">
-`r icon::fa('twitter')` [@mattdray](https://twitter.com/mattdray) | 
-`r icon::fa('github')` [matt-dray](https://github.com/matt-dray) |
-`r icon::fa('globe')` [rostrum.blog](https://www.rostrum.blog/) 
+`r icons::fontawesome('github')` [popovs](https://github.com/popovs)
 <p>
 <p style="font-size:20px;">
-`r icon::fa('info')` 
-[Blog post](https://www.rostrum.blog/2019/11/01/usethis/) | 
-[Slide source](https://github.com/matt-dray/r-pkg-slides) | 
-[Session details](https://co-analysis.github.io/co-coffee-and-coding/session_2019-11-01_r-package-usethis.html)
+`r icons::fontawesome('info')` 
+[Original blog post](https://www.rostrum.blog/2019/11/01/usethis/) | 
+[Slide source](https://github.com/popovs/r-pkg-slides)
 <p>
 <p style="font-size:20px;">
-`r icon::fa('keyboard')` Press &#8592; &#8594; to navigate, P for presenter notes, F for full screen
+`r icons::fontawesome('keyboard')` Press &#8592; &#8594; to navigate, P for presenter notes, F for full screen
 <p>
 
 ---
@@ -52,6 +51,8 @@ class: middle
 Some useful tutorials:
 
 * Hilary Parker's [post](https://hilaryparker.com/2014/04/29/writing-an-r-package-from-scratch/)
+* Matt Dray's [blog post](https://www.rostrum.blog/2019/11/01/usethis/), which this tutorial is based on!
+* Patricio R Estévez-Soto's [tutorial](https://www.prestevez.com/post/r-package-tutorial/#tests)
 * Tomas Westlake's [update](https://r-mageddon.netlify.com/post/writing-an-r-package-from-scratch/)
 * Emil Hvitfeldt’s {usethis} [post](https://www.hvitfeldt.me/blog/usethis-workflow-for-package-development/)
 * Karl Broman's [site](https://kbroman.org/pkg_primer/)
@@ -60,11 +61,12 @@ Some useful tutorials:
 ---
 class: middle
 
-But first: name these cats
-<center><img src='img/cat_tweet.png'></center>
+But first: some fjrods
+<center><img src='img/fjords.png'></center>
 ???
-* Ossie (left) and Evie (right): the Cabinet Office cats
-* It will become obvious why I've mentioned this
+* We're in Norway, so there's plenty of pretty fjords!
+* Something that ties us together, me coming from BC and you all in Norway... 
+* It will become apparent why I've brought this up. These fjords will be our programmatic muses
 ---
 class: middle
 
@@ -78,7 +80,7 @@ Who has:
 ---
 class: inverse, middle
 
-Let's get #deep
+Let's talk functions
 ---
 class: middle
 
@@ -108,7 +110,7 @@ background-image: url("img/hex_small.jpg")
 background-size: cover
 ???
 * Some packages are built into R already; you can install more
-* Examples: {readr} to read files, {parsnip} for model fitting, {xaringan} to create slides
+* Examples: {readr} to read files, {dplyr} to manipulate data, {ggplot2} to plot data
 * Image by Amelia McNamara
 ---
 class: inverse, middle
@@ -139,20 +141,22 @@ class: middle
 Create package folder and files `r emo::ji("new")`
 
 ```{r eval=FALSE}
-usethis::create_package("~/Desktop/cabinet")
+usethis::create_package("~/Documents/R/fjoRds")
 
-# ✔ Setting active project to '/Users/matthewdray/Desktop/cabinet'
+# ✔ Creating '/Users/sarahpopov/Documents/R/fjoRds/'
+# ✔ Setting active project to '/Users/sarahpopov/Documents/R/fjoRds'
 # ✔ Creating 'R/' #<<
-# ✔ Creating 'man/' #<<
 # ✔ Writing 'DESCRIPTION' #<<
 # ✔ Writing 'NAMESPACE' #<<
-# ✔ Writing 'cabinet.Rproj'
+# ✔ Writing 'fjoRds.Rproj' #<<
+# ✔ Adding '^fjoRds\\.Rproj$' to '.Rbuildignore'
 # ✔ Adding '.Rproj.user' to '.gitignore'
-# ✔ Adding '^cabinet\\.Rproj$', '^\\.Rproj\\.user$' to '.Rbuildignore'
-# ✔ Opening new project 'cabinet' in RStudio #<<
+# ✔ Adding '^\\.Rproj\\.user$' to '.Rbuildignore'
+# ✔ Opening '/Users/sarahpopov/Documents/R/fjoRds/' in new RStudio session #<<
 ```
 ???
 * A package is a folder containing a bunch of files; `create_package()` creates these for you
+* You can see a bunch of files are created in the R/ directory - a skeleton of a package was created. We'll get to all of them in time
 * Some of the files contain the functions, other files are for documentation, for example
 * If you run the line from within RStudio, it automatically creates an RStudio (.Rproj) file for your new package and opens it
 * I'm using the `package::function()` convention throughout so you know what package each function is from
@@ -162,10 +166,10 @@ class: middle
 The resulting file structure
 
 ```{r eval=FALSE}
-cabinet/
+fjoRds/
   ├── man/
   ├── R/  #<<
-  ├── cabinet.Rproj
+  ├── fjoRds.Rproj
   ├── DESCRIPTION  #<<
   └── NAMESPACE
 ```
@@ -184,14 +188,14 @@ class: middle
 Create a script file for functions
 
 ```{r eval=FALSE}
-usethis::use_r("felines")
+usethis::use_r("finder")
 
-# ● Modify 'R/felines.R'
+# ● Modify 'R/finder.R'
 ```
 ???
 * Obviously we need to add functions to our package
 * They go in R script files in the `R/` folder
-* `use_r()` creates a script file with the provided string argument as its name
+* `use_r()` creates a script file (`finder.R`) with the provided string argument as its name
 * It will open automatically in RStudio
 * You would typically create multiple script files, where functions with the same 'theme' go in the same script file
 ---
@@ -200,32 +204,31 @@ class: middle
 Script added to `R/`!
 
 ```{r eval=FALSE}
-cabinet/
+fjoRds/
   ├── man/
   ├── R/
-  |   └── felines.R #<<
-  ├── cabinet.Rproj
+  |   └── finder.R #<<
+  ├── fjoRds.Rproj
   ├── DESCRIPTION
   └── NAMESPACE
 ```
 ---
 class: middle
 
-Add functions to `R/felines.R` `r emo::ji("technologist")`
+Add functions to `R/finder.R` `r emo::ji("technologist")`
 
 ```{r eval=FALSE}
-cabinet_cat <- function(name) {
-
+fjord_finder <- function(name) {
+  
   stopifnot(is.character(name))
   
-  if (name %in% c("Ossie", "Evie")) {
-    print(paste(name, "is a good Cabinet Office kitty."))
-  } else if (name %in% c("Palmerston", "Larry", "Gladstone")) {
-    print(paste(name, "isn't a Cabinet Office cat!"))
+  if (name %in% c("Sognefjord", "Hardangerfjord")) {
+    print(paste(name, "is a nice Norwegian fjord!"))
+  } else if (name %in% c("Princess Louisa Inlet", "Sechelt Inlet", "Skookumchuck Narrows")) {
+    print(paste(name, "- I see you're in Canada, eh!"))
   } else {
-    print("You've much to learn about government cats.")
+    print(paste0(name, "? Never heard of em."))
   }
-
 }
 ```
 ???
@@ -240,10 +243,8 @@ Document it `r emo::ji("document")`
 ```{r eval=FALSE}
 devtools::document()
 
-# Updating cabinet documentation
-# Updating roxygen version in /Users/matthewdray/Desktop/cabinet/DESCRIPTION
-# Writing NAMESPACE #<<
-# Loading cabinet
+# ℹ Updating fjoRds documentation
+# ℹ Loading fjoRds
 ```
 ???
 * The only real change here is the addition of the function to the `NAMESPACE`
@@ -254,17 +255,17 @@ class: middle
 Use the function! `r emo::ji("cat2")`
 
 ```{r eval=FALSE}
-cabinet_cat("Ossie")
+fjord_finder("Sognefjord")
 
-# Ossie is a good Cabinet Office kitty.
+# "Sognefjord is a nice Norwegian fjord!"
 
-cabinet_cat("Gladstone")
+fjord_finder("Sechelt Inlet")
 
-# Gladstone isn't a Cabinet Office cat!
+# "Sechelt Inlet - I see you're in Canada, eh!"
 
-cabinet_cat("Garfield")
+fjord_finder("Illulissat")
 
-# You've much to learn about government cats.
+# "Illulissat? Never heard of em."
 ```
 ???
 * We could stop here, but this isn't that useful
@@ -281,16 +282,22 @@ Add internal documentation
 ---
 class:middle
 
+<center><img src="img/roxygen2.png" width=200></center>
+
 Basic approach:
 
-1. Write text in certain places
+1. Write `roxygen2` descriptions
 1. Run `devtools::document()`
 1. `.Rd` file generated
-1. Call `?function_name` as needed
+1. Call `?package_name` or `?function_name` as needed
+
+???
+* What is `roxygen2`? It's a way to document your package and functions. Basically, you write metadata, and `roxygen2` automatically 'translates' that into R help files.
+* You don't need to download or install `roxygen2` separately. It is already part of your `devtools` installation.
 ---
 class: middle
 
-Add documentation for:
+With that knowledge, let's now add documentation for our package! Let's document:
 
 * the package by editing `DESCRIPTION`
 * each function by editing `.R` files
@@ -300,20 +307,19 @@ class: middle
 Edit the `DESCRIPTION`
 
 ```{r eval=FALSE}
-Package: cabinet
+Package: fjoRds
 Title: A Package To Show How To Create Packages #<<
 Version: 0.0.0.9000
 Authors@R: #<<
-    person(given = "Matt", #<<
-           family = "Dray", #<<
-           role = c("aut", "cre"), #<<
-           email = "matthew.dray@digital.cabinet-office.gov.uk") #<<
-Description: A package created for a Cabinet Office Coffee & Coding #<<
-    session that doesn't do anything useful in particular. #<<
-License: What license it uses
+    person(given = "Sarah", #<<
+           family = "Popov", #<<
+           email = "sarah.popov@mail.mcgill.ca", #<<
+           role = c("aut", "cre")) #<<
+Description: A package created for the Bergen R Ladies workshop that helps us find fjords. #<<
+License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a license
 Encoding: UTF-8
-LazyData: true
-RoxygenNote: 6.1.1
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
 ```
 ???
 * The `DESCRIPTION` file describes the package: what, who, etc
@@ -328,13 +334,14 @@ Start documenting the package by altering the `DESCRIPTION`
 ```{r eval=FALSE}
 usethis::use_package_doc()
 
-# ✔ Writing 'R/cabinet-package.R'
+# ✔ Writing 'R/fjoRds-package.R'
+# • Modify 'R/fjoRds-package.R'
 
 devtools::document()
 
-# Updating cabinet documentation
-# Loading cabinet
-# Writing cabinet-package.Rd #<<
+# ℹ Updating fjoRds documentation
+# ℹ Loading fjoRds
+# Writing fjoRds-package.Rd #<<
 ```
 ---
 class: middle
@@ -342,13 +349,13 @@ class: middle
 An `.Rd` was generated in `man/`!
 
 ```{r eval=FALSE}
-cabinet/
+fjoRds/
   ├── man/
-  |   └── cabinet-package.Rd #<<
+  |   └── fjoRds-package.Rd #<<
   ├── R/
-  |   ├── cabinet-package.R #<<
-  |   └── felines.R
-  ├── cabinet.Rproj
+  |   ├── fjoRds-package.R #<<
+  |   └── finder.R
+  ├── fjoRds.Rproj
   ├── DESCRIPTION
   └── NAMESPACE
 ```
@@ -363,57 +370,64 @@ A peek at the `.Rd` file
 
 ```{r eval=FALSE}
 % Generated by roxygen2: do not edit by hand #<<
-% Please edit documentation in R/cabinet-package.R #<<
+% Please edit documentation in R/fjoRds-package.R #<<
 \docType{package}
-\name{cabinet-package}
-\alias{cabinet}
-\alias{cabinet-package}
-\title{cabinet: A Package To Show How To Create Packages}
+\name{fjoRds-package}
+\alias{fjoRds}
+\alias{fjoRds-package}
+\title{fjoRds: A Package To Show How To Create Packages}
 \description{
-A package created for a Cabinet Office Coffee & Coding
-    session that doesn't do anything useful in particular.
+A package created for the Bergen R Ladies workshop that helps us find fjords.
 }
 \author{
-\strong{Maintainer}: Matt Dray \email{matthew.dray@digital.cabinet-office.gov.uk}
+\strong{Maintainer}: Sarah Popov \email{sarah.popov@mail.mcgill.ca}
 
 }
 \keyword{internal}
 ```
 ???
 * It would've been a pain to write this by hand
-* The `.Rd` extension is 'roxygen documentation'
+* The `.Rd` extension is 'roxygen2 documentation'
 * It's in a kind of LaTeX implementation
 * This is what the `DESCRIPTION` file was converted to so it can be rendered as a help page
 ---
 class: middle
 
-Add roxygen comments above functions
+Now we can run `?fjoRds` to get some info about our package:
+
+<center><img src="img/fjords-doc.png"></center>
+
+---
+class: middle
+
+We should do this for our function, too.
+---
+class: middle
+
+Add roxygen2 comments above functions
 
 ```{r}
-#' @title Check For A Cabinet Office Cat
-#' @description Check whether a name belongs to one of the cats from the UK
-#'     government's Cabinet Office.
-#' @param name A cat name provided as a character string.  #<<
+#' @title Find a Fjord #<<
+#' @description Check whether a name belongs to a fjord in Norway or Canada. #<<
+#' @param name A fjord name provided as a character string. #<<
 #' @export  #<<
-#' @examples
-#' cabinet_cat("Evie")
+#' @examples #<<
+#' fjord_finder("Hardangerfjord") #<<
+fjord_finder <- function(name) {
 
-cabinet_cat <- function(name) {
-  
   stopifnot(is.character(name))
-  
-  if (name %in% c("Ossie", "Evie")) {
-    print(paste(name, "is a good Cabinet Office kitty."))
-  } else if (name %in% c("Palmerston", "Larry", "Gladstone")) {
-    print(paste(name, "isn't a Cabinet Office cat!"))
+
+  if (name %in% c("Sognefjord", "Hardangerfjord")) {
+    print(paste(name, "is a nice Norwegian fjord!"))
+  } else if (name %in% c("Princess Louisa Inlet", "Sechelt Inlet", "Skookumchuck Narrows")) {
+    print(paste(name, "- I see you're in Canada, eh!"))
   } else {
-    print("You've much to learn about government cats.")
-    
+    print(paste0(name, "? Never heard of em."))
   }
 }
 ```
 ???
-* Add these lines above the function in `R/felines.R`
+* Add these lines above the function in `R/finder.R`
 * Possibly the trickiest part of the process, because you may not have seen roxygen before
 * Special comment block (`#'`) followed by `@thing` to provide info about the function
 * Includes title (`@title`), description (`@description`), the arguments (`@param`), etc
@@ -422,30 +436,37 @@ cabinet_cat <- function(name) {
 ---
 class: middle
 
+That's a lot to remember. Luckily, RStudio has a handy shortcut! `Code > Insert Roxygen skeleton`
+
+<center><img src="img/roxygen-shortcut.png"></center>
+
+---
+class: middle
+
 And `document()` again
 
 ```{r eval = FALSE}
 devtools::document()
 
-# Updating cabinet documentation
-# Loading cabinet
+# ℹ Updating fjoRds documentation
+# ℹ Loading fjoRds
 # Writing NAMESPACE
-# Writing cabinet_cat.Rd  #<<
+# Writing fjord_finder.Rd #<<
 ```
 ---
 class: middle
 
-The roxygen was also converted to `.Rd`
+The `fjord_finder` roxygen block was also converted to `.Rd`!
 
 ```{r eval=FALSE}
-cabinet/
+fjoRds/
   ├── man/
-  |   ├── cabinet-package.Rd
-  |   └── cabinet_cat.Rd #<<
+  |   ├── fjoRds-package.Rd
+  |   └── fjord_finder.Rd #<<
   ├── R/
-  |   ├──cabinet-package.R
-  |   └── felines.R
-  ├── cabinet.Rproj
+  |   ├── fjoRds-package.R
+  |   └── finder.R
+  ├── fjoRds.Rproj
   ├── DESCRIPTION
   └── NAMESPACE
 ```
@@ -455,11 +476,11 @@ class: middle
 Now you can see documentation
 
 ```{r eval=FALSE}
-?cabinet_cat
+?fjord_finder
 
-# Rendering development documentation for 'cabinet_cat'
+# ℹ Rendering development documentation for "fjord_finder"
 ```
-<center><img src="img/cabinet_cat_docs.png" width=500></center>
+<center><img src="img/fjord_finder-doc.png" width=500></center>
 ???
 * This will appear in the 'help' pane of RStudio
 * Now people can see what the function is for
@@ -470,7 +491,7 @@ class: inverse, middle
 Add longer-form documentation
 ???
 * A README (general package introduction, how to install, etc; useful for GitHub landing page)
-* Focussed vignettes to explain how to do particular tasks
+* Focused vignettes to explain how to do particular tasks
 ---
 class: middle
 
@@ -480,7 +501,8 @@ Add a README `r emo::ji("memo")`
 usethis::use_readme_md()
 
 # ✔ Writing 'README.md'
-# ● Modify 'README.md' #<<
+# • Modify 'README.md'
+# • Update 'README.md' to include installation instructions.
 ```
 ???
 * This is added to the project home directory
@@ -493,16 +515,16 @@ class: middle
 Add walkthrough vignettes
 
 ```{r eval=FALSE}
-usethis::use_vignette("Check cat names")
+usethis::use_vignette("find_fjords")
 
-# ✔ Adding 'knitr' to Suggests field in DESCRIPTION #<<
+# ✔ Adding 'knitr' to Suggests field in DESCRIPTION
 # ✔ Setting VignetteBuilder field in DESCRIPTION to 'knitr'
-# ✔ Adding 'rmarkdown' to Suggests field in DESCRIPTION #<<
-# ✔ Creating 'vignettes/'
-# ✔ Adding '*.html', '*.R' to 'vignettes/.gitignore'
 # ✔ Adding 'inst/doc' to '.gitignore'
-# ✔ Creating 'vignettes/check-cat-names.Rmd'
-# ● Modify 'vignettes/check-cat-names.Rmd' #<<
+# ✔ Creating 'vignettes/' #<<
+# ✔ Adding '*.html', '*.R' to 'vignettes/.gitignore'
+# ✔ Adding 'rmarkdown' to Suggests field in DESCRIPTION
+# ✔ Writing 'vignettes/find_fjords.Rmd' #<<
+# • Modify 'vignettes/find_fjords.Rmd' #<<
 ```
 ???
 * This creates an R Markdown file in `vignettes/`
@@ -517,9 +539,9 @@ You guessed it
 ```{r eval=FALSE}
 devtools::document()
 
-# Updating cabinet documentation
+# ℹ Updating fjoRds documentation
+# ℹ Loading fjoRds
 # Writing NAMESPACE
-# Loading cabinet
 # Writing NAMESPACE
 ```
 ---
@@ -528,16 +550,16 @@ class: middle
 The new documentation will help people use the package
 
 ```{r eval=FALSE}
-cabinet/
+fjoRds/
   ├── man/
-  |   ├── cabinet-package.Rd
-  |   └── cabinet_cat.Rd
+  |   ├── fjoRds-package.Rd
+  |   └── fjord_finder.Rd
   ├── R/
-  |   ├── cabinet-package.R
-  |   └── felines.R
+  |   ├── fjoRds-package.R
+  |   └── finder.R
   ├── vignettes/ #<<
-  |   └── check-cat-names.Rmd #<<
-  ├── cabinet.Rproj
+  |   └── find_fjords.Rmd #<<
+  ├── fjoRds.Rproj
   ├── DESCRIPTION
   ├── NAMESPACE
   └── README.md #<<
@@ -545,7 +567,7 @@ cabinet/
 ---
 class: inverse, middle
 
-Add packages to your package
+Use other packages in your function code
 ???
 * I only used base functions in the package
 * What if I want to refer to functions from other packages?
@@ -555,22 +577,46 @@ class: middle
 Let's use {glue} instead of `paste()`
 
 ```{r eval=FALSE}
-cabinet_cat <- function(name) {
-  
+fjord_finder <- function(name) {
+
   stopifnot(is.character(name))
-  
-  if (name %in% c("Ossie", "Evie")) {
-    print(glue::glue("{name} is a good Cabinet Office kitty.")) #<<
-  } else if (name %in% c("Palmerston", "Larry", "Gladstone")) {
-    print(glue::glue("{name} isn't a Cabinet Office cat!")) #<<
+
+  if (name %in% c("Sognefjord", "Hardangerfjord")) {
+    print(glue::glue("{name} is a nice Norwegian fjord!")) #<<
+  } else if (name %in% c("Princess Louisa Inlet", "Sechelt Inlet", "Skookumchuck Narrows")) {
+    print(glue::glue("{name} - I see you're in Canada, eh!")) #<<
   } else {
-    print("You've much to learn about government cats.")
+    print(paste0(name, "? Never heard of em."))
   }
-  
 }
 ```
 ???
 * Use the `package::function` convention
+---
+class: middle
+
+Notice we did NOT do this: 
+
+```{r eval = FALSE}
+library(glue) # NO!! ❌🆘🙅 #<<
+
+fjord_finder <- function(name) {
+  
+  stopifnot(is.character(name))
+  
+  if (name %in% c("Sognefjord", "Hardangerfjord")) {
+    print(glue("{name} is a nice Norwegian fjord!")) #<<
+  } else if (name %in% c("Princess Louisa Inlet", "Sechelt Inlet", "Skookumchuck Narrows")) {
+    print(glue("{name} - I see you're in Canada, eh!")) #<<
+  } else {
+    print(paste0(name, "? Never heard of em."))
+  }
+}
+```
+---
+class: middle
+
+When referencing other package function inside your own package, always use `package::function()` notation.
 ---
 class: middle
 
@@ -580,37 +626,204 @@ Add {glue} to the package
 usethis::use_package("glue")
 
 # ✔ Adding 'glue' to Imports field in DESCRIPTION #<<
-# ● Refer to functions with `glue::fun()`
+# • Refer to functions with `glue::fun()`
 ```
 ---
 
 Package name added to 'Imports' in `DESCRIPTION`
 
 ```{r eval=FALSE}
-Package: cabinet
+Package: fjoRds
 Title: A Package To Show How To Create Packages
 Version: 0.0.0.9000
-Authors@R:
-    person(given = "Matt",
-           family = "Dray",
-           role = c("aut", "cre"),
-           email = "matthew.dray@digital.cabinet-office.gov.uk")
-Description: A package created for a Cabinet Office Coffee & Coding 
-    session that doesn't do anything useful in particular.
-License: What license it uses
+Authors@R: 
+    person(given = "Sarah", 
+           family = "Popov", 
+           email = "sarah.popov@mail.mcgill.ca", 
+           role = c("aut", "cre")) 
+Description: A package created for the Bergen R Ladies workshop that helps us find fjords.
+License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
-RoxygenNote: 6.1.1
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
 Imports: #<<
     glue #<<
 
 ```
 ???
-* So {glue} wil be installed when {cabinet} is installed
+* So {glue} wil be installed when {fjoRds} is installed
 * If the package isn't on CRAN, you can use 'Remotes' instead of 'Imports'
 * You don't always want to install things on someone else's machine
 * You can use 'Suggests' to suggest packages instead
 * {testthat} is often suggested because it's not usually used in user-facing functions
+---
+class: inverse, middle
+
+Add your own data
+???
+* So, we've added external package functions - but what if we want to add our own dataset to the package?
+* Let's add a list of Norwegian fjords to make our function a bit better.
+---
+class: middle
+
+Let's add a list of Norwegian fjords to our package to make our function a bit better.
+
+<center><img src="img/norway-fjords.png"></center>
+
+???
+* Let's just use this list of Wikipedia, so we can truly check if a fjord is in Norway!
+* I downloaded this table off Wikipedia as a csv file
+---
+class: middle
+
+Let's add this list of Norwegian fjords to our package - again using the {usethis} package.
+
+```{r eval = FALSE}
+usethis::use_data_raw()
+
+# ✔ Creating 'data-raw/'
+# ✔ Adding '^data-raw$' to '.Rbuildignore'
+# ✔ Writing 'data-raw/DATASET.R' #<<
+# • Modify 'data-raw/DATASET.R'
+# • Finish the data preparation script in 'data-raw/DATASET.R'
+# • Use `usethis::use_data()` to add prepared data to package
+```
+---
+class: middle
+
+```{r eval = FALSE}
+fjoRds/
+  ├── data-raw/ #<<
+  |   ├── DATASET.R #<<
+  ├── man/
+  |   ├── fjoRds-package.Rd
+  |   └── fjord_finder.Rd
+  ├── R/
+  |   ├── fjoRds-package.R
+  |   └── finder.R
+  ├── vignettes/ 
+  |   └── find_fjords.Rmd 
+  ├── fjoRds.Rproj
+  ├── DESCRIPTION
+  ├── NAMESPACE
+  └── README.md 
+```
+---
+class: middle
+
+This created a new folder called `data-raw/`. Into this folder, I put my Norwegian fjords .csv file:
+
+```{r eval = FALSE}
+fjoRds/
+  ├── data-raw/
+  |   ├── DATASET.R
+  |   ├── norwegian_fjords.csv #<<
+  ├── man/
+  |   ├── fjoRds-package.Rd
+  |   └── fjord_finder.Rd
+  ├── R/
+  |   ├── fjoRds-package.R
+  |   └── finder.R
+  ├── vignettes/ 
+  |   └── find_fjords.Rmd 
+  ├── fjoRds.Rproj
+  ├── DESCRIPTION
+  ├── NAMESPACE
+  └── README.md 
+```
+---
+class: middle
+
+Now, we edit `DATASET.R` and run the code:
+
+```{r eval = FALSE}
+## code to prepare `DATASET` dataset goes here
+
+fjords <- read.csv("data-raw/norwegian_fjords.csv") # Read in csv file
+names(fjords) <- c("name", "length_km", "county", "municipality", "coordinates") # clean up column names
+usethis::use_data(fjords, overwrite = TRUE) # save as package dataset!
+
+# ✔ Adding 'R' to Depends field in DESCRIPTION
+# ✔ Creating 'data/' #<<
+# ✔ Setting LazyData to 'true' in 'DESCRIPTION'
+# ✔ Saving 'fjords' to 'data/fjords.rda' #<<
+# • Document your data (see 'https://r-pkgs.org/data.html')
+```
+---
+class: middle
+
+Now we have a `data/` folder. rda stands for "R data"
+
+```{r eval = FALSE}
+fjoRds/
+  ├── data/ #<<
+  |   ├── fjords.rda #<<
+  ├── data-raw/
+  |   ├── DATASET.R
+  |   ├── norwegian_fjords.csv 
+  ├── man/
+  |   ├── fjoRds-package.Rd
+  |   └── fjord_finder.Rd
+  ├── R/
+  |   ├── fjoRds-package.R
+  |   └── finder.R
+  ├── vignettes/ 
+  |   └── find_fjords.Rmd 
+  ├── fjoRds.Rproj
+  ├── DESCRIPTION
+  ├── NAMESPACE
+  └── README.md 
+```
+---
+class: middle
+
+Now, we have a list of Norwegian fjords bundled into our package. Try running `data("fjords")`!
+---
+class: middle
+
+We can improve our `fjord_finder()` function a little bit now.
+
+```{r eval = FALSE}
+#' @title Find a Fjord
+#' @description Check whether a name belongs to a fjord in Norway or Canada.
+#' @param name A fjord name provided as a character string.
+#' @export
+#' @examples
+#' fjord_finder("Hardangerfjord")
+fjord_finder <- function(name) {
+
+  stopifnot(is.character(name))
+
+  if (name %in% fjords$name) { #<<
+    print(glue::glue("{name} is a nice Norwegian fjord!")) 
+  } else if (name %in% c("Princess Louisa Inlet", "Sechelt Inlet", "Skookumchuck Narrows")) {
+    print(glue::glue("{name} - I see you're in Canada, eh!")) 
+  } else {
+    print(paste0(name, "? Never heard of em."))
+  }
+}
+```
+---
+class: middle
+
+Remember to document changes first!
+Now, with our new and improved function, we can check for any fjord in Norway.
+
+```{r eval = FALSE}
+devtools::document() # Remember to do this after any changes
+
+fjord_finder("Adventfjorden") 
+
+# Adventfjorden is a nice Norwegian fjord!
+
+fjord_finder("Bøkfjord")
+
+# Bøkfjord is a nice Norwegian fjord!
+```
 ---
 class: inverse, middle
 
@@ -619,6 +832,7 @@ Test your functions
 * This session isn't about testing
 * But you can set up testing for your files quickly with {usethis} 
 * You want to make sure that your functions behave as intended
+* I am not an expert in this myself, and prooobably should test my own packages more! 
 ---
 class: middle
 
@@ -627,18 +841,20 @@ Create directory structure for {testhat}
 ```{r eval=FALSE}
 usethis::use_testthat()
 
-# ✔ Adding 'testthat' to Suggests field in DESCRIPTION #<<
-# ✔ Creating 'tests/testthat/'  #<<
-# ✔ Writing 'tests/testthat.R'
+# ✔ Adding 'testthat' to Suggests field in DESCRIPTION
+# ✔ Setting Config/testthat/edition field in DESCRIPTION to '3'
+# ✔ Creating 'tests/testthat/'
+# ✔ Writing 'tests/testthat.R' #<<
+# • Call `use_test()` to initialize a basic test file and open it for editing.
 ```
 
 Create a test file
 
 ```{r eval=FALSE}
-usethis::use_test("felines")
+usethis::use_test("finder")
 
-# ✔ Writing 'tests/testthat/test-felines.R'
-# ● Modify 'tests/testthat/test-felines.R'  #<<
+# ✔ Writing 'tests/testthat/test-finder.R'
+# ● Modify 'tests/testthat/test-finder.R'  #<<
 ```
 ???
 * {testthat} is a package for writing tests
@@ -648,13 +864,11 @@ usethis::use_test("felines")
 ---
 class: middle
 
-Add a test to `R/test-felines.R` `r emo::ji("check")`
+Add a test to `R/test-finder.R` `r emo::ji("check")`
 
 ```{r eval=FALSE}
-context("test-felines")
-
 test_that("numeric input causes error", {
-  expect_error(cabinet::cabinet_cat(1))
+  expect_error(fjoRds::fjord_finder(1))
 })
 ```
 ???
@@ -669,32 +883,29 @@ Run the tests `r emo::ji("ok")`
 ```{r eval=FALSE}
 devtools::test()
 
-# Loading cabinet
-# Testing cabinet
-# ✔ | OK F W S | Context
-# ✔ |  1       | test-felines [0.1 s]
+# ℹ Loading fjoRds
+# ℹ Testing fjoRds
+# ✔ | F W S  OK | Context
+# ✔ |         1 | finder                                        
 # 
-# ══ Results ═════════════════════════════════
-# Duration: 0.1 s
-# 
-# OK:       1
-# Failed:   0
-# Warnings: 0
-# Skipped:  0
+# ══ Results ═══════════════════════════════════════════════════
+# [ FAIL 0 | WARN 0 | SKIP 0 | PASS 1 ]
 ```
 ---
 class: middle
 
-Here's what the package section of the `DESCRIPTION` looks like now
+After all that, here's what the package section of the `DESCRIPTION` looks like now
 
 ```{r eval=FALSE}
-Suggests: #<<
-    knitr, #<<
-    rmarkdown, #<<
-    testthat #<<
-VignetteBuilder: knitr #<<
-Imports:
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0) #<<
+VignetteBuilder: knitr
+Imports: 
     glue
+Depends: 
+    R (>= 2.10)
 ```
 ---
 class: inverse, middle
@@ -708,24 +919,84 @@ Share the package
 ---
 class: middle
 
-Add a license and code of conduct for interacting with your package
+Let's add a usage license
 
-```{r eval=FALSE}
-usethis::use_cc0_license("Matt Dray")
+???
+Nowadays, most software comes with a product license. It's easy to add with the {usethis} package
+---
+class: middle
 
-# ✔ Setting License field in DESCRIPTION to 'CC0'
-# ✔ Writing 'LICENSE.md'  #<<
+If you remember from the `DESCRIPTION` file, it suggests a few handy functions to add a license file
+
+```{r eval = FALSE}
+Package: fjoRds
+Title: A Package To Show How To Create Packages
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Sarah", 
+           family = "Popov", 
+           email = "sarah.popov@mail.mcgill.ca", 
+           role = c("aut", "cre")) 
+Description: A package created for the Bergen R Ladies workshop that helps us find fjords.
+License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a license #<<
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+```
+---
+class: middle
+
+```{r eval = FALSE}
+usethis::use_mit_license()
+
+# ✔ Setting License field in DESCRIPTION to 'MIT + file LICENSE'
+# ✔ Writing 'LICENSE'
+# ✔ Writing 'LICENSE.md'
 # ✔ Adding '^LICENSE\\.md$' to '.Rbuildignore'
 ```
+---
+class: middle
+
+If you check your `DESCRIPTION`, file it's been updated to show the MIT license. A `LICENSE` file was added too:
+
+```{r eval = FALSE}
+fjoRds/
+  ├── data/
+  |   ├── fjords.rda
+  ├── data-raw/
+  |   ├── DATASET.R
+  |   ├── norwegian_fjords.csv 
+  ├── man/
+  |   ├── fjoRds-package.Rd
+  |   └── fjord_finder.Rd
+  ├── R/
+  |   ├── fjoRds-package.R
+  |   └── finder.R
+  ├── tests/
+  ├── vignettes/ 
+  |   └── find_fjords.Rmd 
+  ├── fjoRds.Rproj
+  ├── DESCRIPTION
+  ├── LICENSE #<<
+  ├── LICENSE.md #<<
+  ├── NAMESPACE
+  └── README.md 
+```
+---
+class: middle
+
+You can also add a default code of conduct for interacting with your package
 
 ```{r eval=FALSE}
-usethis::use_code_of_conduct()
+usethis::use_code_of_conduct("sarah.popov@mail.mcgill.ca")
 
 # ✔ Writing 'CODE_OF_CONDUCT.md'
 # ✔ Adding '^CODE_OF_CONDUCT\\.md$' to '.Rbuildignore'
-# ● Don't forget to describe the code of conduct in your README: #<<
-# Copying code to clipboard:
-#   Please note that the 'cabinet' project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By contributing to this project, you agree to abide by its terms.
+# • Don't forget to describe the code of conduct in your README:
+#   ## Code of Conduct
+#   
+#   Please note that the fjoRds project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
+#   [Copied to clipboard]
 ```
 ???
 * If we're going to share our package, we should set a license and a code of conduct
@@ -741,7 +1012,7 @@ usethis::use_git()
 
 # ✔ Initialising Git repo
 # ✔ Adding '.Rhistory', '.RData' to '.gitignore'
-# OK to make an initial commit of 8 files?  #<<
+# OK to make an initial commit of 19 files?  #<<
 # 1: Yes
 # 2: No way
 # 3: Absolutely not
@@ -762,48 +1033,88 @@ Selection: 3
 ---
 class: middle
 
-Configure a Personal Access Token to access the GitHub API `r emo::ji("ticket")`
+Now let's try to push to Github
 
-```{r eval=FALSE}
-usethis::browse_github_pat()
+```{r eval = FALSE}
+usethis::use_github()
 
-# ✔ Opening URL https://github.com/settings/tokens/new?scopes=repo,gist&description=R:GITHUB_PAT
-# ● Call `edit_r_environ()` to open '.Renviron' and store your PAT with a line like:
-#   GITHUB_PAT=xxxyyyzzz
-# ● Make sure '.Renviron' ends with a newline!
-
-usethis::edit_r_environ()
-
-# ● Modify '/Users/matthewdray/.Renviron'
-# ● Restart R for changes to take effect
+# ℹ Defaulting to 'https' Git protocol
+# ✔ Setting active project to '/Users/sarahpopov/Documents/R/fjoRds'
+# Error in gh_process_response(raw) : 
+# GitHub API error (401): #<<
+# Message: Bad credentials #<<
+# Read more at https://docs.github.com/rest
+# Type .Last.error.trace to see where the error occurred
 ```
-???
-* I've already added a PAT to my `.Renviron`
 ---
 class: middle
 
-Push the package to GitHub `r emo::ji("cloud")`
+Oops, bad credentials. Need to create a personal access token (PAT) to link our local machine and remote GitHub account. This function will open a page in GitHub - be sure to scroll down and hit "Create token", then copy that new token to your clipboard.
+
+```{r eval = FALSE}
+usethis::create_github_token()
+
+# • Call `gitcreds::gitcreds_set()` to register this token in the local Git credential store
+#   It is also a great idea to store this token in any password-management software that you use
+# ✔ Opening URL 'https://github.com/settings/tokens/new?scopes=repo,user,gist,workflow&description=DESCRIBE THE TOKEN\'S USE CASE'
+```
+
+<center><img-src="img/github-PAT.png"></center>
+---
+class: middle
+
+Add our new token. Paste the token into the console when prompted.
+
+```{r eval = FALSE}
+gitcreds::gitcreds_set()
+
+-> Your current credentials for 'https://github.com':
+
+  protocol: https
+  host    : github.com
+  username: PersonalAccessToken
+  password: <-- hidden -->
+
+-> What would you like to do? 
+
+1: Keep these credentials
+2: Replace these credentials #<<
+3: See the password / token
+
+Selection: 2 #<<
+
+-> Removing current credentials...
+
+? Enter new password or token: **************************** #<<
+-> Adding new credentials...
+-> Removing credetials from cache...
+-> Done.
+```
+---
+class: middle
+
+Let's try again!
 
 ```{r eval=FALSE}
-usethis::use_github(protocol = "https")
+usethis::use_github()
 
-# ● Check title and description
-#   Name:        cabinet
-#   Description: A Package To Show How To Create Packages
-# Are title and description ok? #<<
-# 1: Not now
-# 2: Definitely
-# 3: No way
+# ✔ Creating GitHub repository 'popovs/fjoRds'
+# ✔ Setting remote 'origin' to 'https://github.com/popovs/fjoRds.git'
+# ✔ Setting URL field in DESCRIPTION to 'https://github.com/popovs/fjoRds'
+# ✔ Setting BugReports field in DESCRIPTION to 'https://github.com/popovs/fjoRds/issues'
+# There is 1 uncommitted file:
+# * 'DESCRIPTION'
+# Is it ok to commit it?
+# 
+# 1: Yes
+# 2: No
+# 3: Not now
 
-Selection: 2
-
-# ✔ Creating GitHub repository #<<
-# ✔ Adding GitHub remote
-# ✔ Adding GitHub links to DESCRIPTION #<<
-# ✔ Setting URL field in DESCRIPTION to 'https://github.com/matt-dray/cabinet' #<<
-# ✔ Setting BugReports field in DESCRIPTION to 'https://github.com/matt-dray/cabinet/issues'
-# ✔ Pushing to GitHub and setting remote tracking branch
-# ✔ Opening URL https://github.com/matt-dray/cabinet
+# Selection: 1 #<<
+# ✔ Adding files #<<
+# ✔ Making a commit with message 'Add GitHub links to DESCRIPTION' #<<
+# ✔ Pushing 'master' branch to GitHub and setting 'origin/master' as upstream branch #<<
+# ✔ Opening URL 'https://github.com/popovs/fjoRds' #<<
 ```
 ---
 class: middle
@@ -816,7 +1127,7 @@ Now it's available to everyone! `r emo::ji("tada")`
 
 ```{r eval=FALSE}
 install.packages("remotes")
-remotes::install_github("matt-dray/cabinet")
+remotes::install_github("popovs/fjoRds")
 ```
 ???
 * {remotes} contains functions for installing packages from remote sources (e.g. GitHub)
@@ -848,34 +1159,54 @@ Generate website files in `docs/`
 ```{r eval=FALSE}
 pkgdown::build_site()
 
-# ── Installing package into temporary library ──────────────────────────────────────
-# ══ Building pkgdown site ══════════════════════════════════════════════════════════
-# Reading from: '/Users/matthewdray/Desktop/cabinet'
-# Writing to:   '/Users/matthewdray/Desktop/cabinet/docs'
-# ── Initialising site ──────────────────────────────────────────────────────────────
-# Copying '../../../../Library/Frameworks/R.framework/Versions/3.5/Resources/library/pkgdown/assets/docsearch.css' to 'docsearch.css'
+# -- Installing package into temporary library -----------------
+# == Building pkgdown site =======================================================
+# Reading from: '/Users/sarahpopov/Documents/R/fjoRds'
+# Writing to:   '/Users/sarahpopov/Documents/R/fjoRds/docs'
+# -- Initialising site -----------------------------------------------------------
+# Copying '../../../../../Library/Frameworks/R.framework/Versions/4.1/Resources/library/pkgdown/BS3/assets/bootstrap-toc.css' to 'bootstrap-toc.css'
+# Copying '../../../../../Library/Frameworks/R.framework/Versions/4.1/Resources/library/pkgdown/BS3/assets/bootstrap-toc.js' to 'bootstrap-toc.js'
 # 
 # [truncated]
 # 
-# ── Building articles ──────────────────────────────────────────────────────────────
+# -- Building articles -----------------------------------------------------------
 # Writing 'articles/index.html'
-# Reading 'vignettes/check-cat-names.Rmd'
-# Writing 'articles/check-cat-names.html'
-# ══ DONE ═══════════════════════════════════════════════════════════════════════════
-# ── Previewing site ────────────────────────────────────────────────────────────────
+# Reading 'vignettes/find_fjords.Rmd'
+# Writing 'articles/find_fjords.html'
+# Writing 'sitemap.xml'
+# == DONE ========================================================================
+# -- Previewing site -------------------------------------------
 ```
 ---
 class: middle
 
-Push changes and go to repo settings
+First, go to repo settings and tell GitHub to update the website from the `docs/` subdirectory every time you push changes to the `master` branch!
 
 <center><img src="img/github_io.png" width = 600><center>
 ---
 class: middle
 
-We have a live website `r emo::ji("champagne")`
+Now push changes to git (terminal/command line console):
 
-<center><img src="img/cabinet_pkgdown.png" width=600><center>
+```{c eval = FALSE}
+> git add .
+> git commit -m "Update documentation."
+> git push origin master
+```
+---
+class: middle
+
+You can check the status of your website deployment here:
+
+
+<center><img src="img/github-deployment.png"><center>
+
+---
+class: middle
+
+Build success! Now we have a live website `r emo::ji("champagne")`
+
+<center><img src="img/fjoRds-pkgdown.png"><center>
 ---
 class: inverse, middle
 
@@ -896,18 +1227,24 @@ So, we:
 ---
 class: middle
 
-Final folder structure
+Final folder structure. Whew, it's a lot - but almost all automatically generated for us with the help of {usethis}.
 
 ```{r eval=FALSE}
-cabinet/
+fjoRds/
   ├── .gitignore
-  ├── .buildignore
-  ├── cabinet.Rproj
-  ├── DESCRIPTION #<<
+  ├── .Rbuildignore
+  ├── .Rhistory
+  ├── CODE_OF_CONDUCT.md
+  ├── data/
+  ├── data-raw/
+  ├── DESCRIPTION 
   ├── docs/
-  ├── man/ #<<
-  ├── NAMESPACE #<<
-  ├── R/ #<<
+  ├── fjoRds.Rproj
+  ├── LICENSE
+  ├── LICENSE.md
+  ├── man/ 
+  ├── NAMESPACE 
+  ├── R/ 
   ├── tests/
   ├── README.md
   └── vignettes/
@@ -920,13 +1257,13 @@ Class: middle
 
 You can: 
 
-* find the package [on GitHub](https://github.com/matt-dray/cabinet)
-* look at [the package website](https://matt-dray.github.io/cabinet/)
+* find the package [on GitHub](https://github.com/popovs/fjoRds)
+* look at [the package website](https://popovs.github.io/fjoRds/)
 * install the package and run the function with:
 
 ```{reval=FALSE}
-remotes::install_github("matt-dray/cabinet")`
-cabinet::cabinet_cat("Ossie")
+remotes::install_github("popovs/fjoRds")`
+fjoRds::fjord_finder("Sognefjord")
 ```
 ---
 class: title-slide, bottom
@@ -936,13 +1273,10 @@ class: title-slide, bottom
 <br>
 
 <p style="font-size:30px;">
-`r icon::fa('twitter')` [@mattdray](https://twitter.com/mattdray) | 
-`r icon::fa('github')` [matt-dray](https://github.com/matt-dray) |
-`r icon::fa('globe')` [rostrum.blog](https://www.rostrum.blog/) 
+`r icons::fontawesome('github')` [popovs](https://github.com/popovs/) 
 <p>
 <p style="font-size:20px;">
-`r icon::fa('info')` 
-[Blog post](https://www.rostrum.blog/2019/11/01/usethis/) | 
-[Slide source](https://github.com/matt-dray/r-pkg-slides) | 
-[Session details](https://co-analysis.github.io/co-coffee-and-coding/session_2019-11-01_r-package-usethis.html)
+`r icons::fontawesome('info')` 
+[Original blog post](https://www.rostrum.blog/2019/11/01/usethis/) | 
+[Slide source](https://github.com/popovs/r-pkg-slides)
 <p>
